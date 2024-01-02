@@ -75,7 +75,7 @@ model Ledger {
   name    String
   ownerId String
 
-  user         User          @relation(fields: [ownerId], references: [id])
+  owner         User          @relation(fields: [ownerId], references: [id])
   transactions Transaction[]
   customers    Customer[]
   suppliers    Supplier[]

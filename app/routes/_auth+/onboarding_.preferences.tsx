@@ -29,6 +29,7 @@ export async function loader({ request }: DataFunctionArgs) {
 }
 
 export async function action({ request }: DataFunctionArgs) {
+	//TODO: check if its a new user with no associated perferences
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
 	await validateCSRF(formData, request.headers)
@@ -58,7 +59,7 @@ export default function OnboardingPreferences() {
 	const isPending = useIsPending()
 
 	const [form, fields] = useForm({
-		id: 'onboarding-form',
+		id: 'onboarding-preferences-form',
 		constraint: getFieldsetConstraint(PreferenceSchema),
 		lastSubmission: actionData?.submission,
 		onValidate({ formData }) {
