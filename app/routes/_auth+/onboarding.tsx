@@ -15,7 +15,6 @@ import {
 } from '@remix-run/react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
-import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
 import { CheckboxField, ErrorList, Field } from '#app/components/forms.tsx'
 import { Spacer } from '#app/components/spacer.tsx'
@@ -26,7 +25,6 @@ import { prisma } from '#app/utils/db.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
 import {
 	NameSchema,
 	PasswordAndConfirmPasswordSchema,
@@ -47,12 +45,10 @@ const SignupFormSchema = z
 		}),
 		remember: z.boolean().optional(),
 		redirectTo: z.string().optional(),
-		language: z.enum(['en', 'ne']).optional(),
-		currency: z.enum(['usd', 'npr']).optional(),
 	})
 	.and(PasswordAndConfirmPasswordSchema)
 
-async function requireOnboardingEmail(request: Request) {
+export async function requireOnboardingEmail(request: Request) {
 	await requireAnonymous(request)
 	const verifySession = await verifySessionStorage.getSession(
 		request.headers.get('cookie'),
@@ -104,7 +100,7 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'error', submission } as const, { status: 400 })
 	}
 
-	const { session, remember, redirectTo } = submission.value
+	const { session, remember } = submission.value
 
 	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
@@ -123,11 +119,14 @@ export async function action({ request }: DataFunctionArgs) {
 		await verifySessionStorage.destroySession(verifySession),
 	)
 
-	return redirectWithToast(
-		safeRedirect(redirectTo),
-		{ title: 'Welcome', description: 'Thanks for signing up!' },
-		{ headers },
-	)
+	// redirect to another onboarding page for preference then ledger
+	// then to dashboard
+	return redirect('/onboarding/preferences', { headers })
+	// return redirectWithToast(
+	// 	safeRedirect('/onboarding/preferences'),
+	// 	{ title: 'Welcome', description: 'Thanks for signing up!' },
+	// 	{ headers },
+	// )
 }
 
 export async function handleVerification({ submission }: VerifyFunctionArgs) {
@@ -197,23 +196,6 @@ export default function SignupRoute() {
 						}}
 						errors={fields.name.errors}
 					/>
-					<Field
-						labelProps={{ htmlFor: fields.currency.id, children: 'Currency' }}
-						inputProps={{
-							...conform.input(fields.currency),
-							autoComplete: 'currency',
-						}}
-						errors={fields.currency.errors}
-					/>
-					<Field
-						labelProps={{ htmlFor: fields.language.id, children: 'Language' }}
-						inputProps={{
-							...conform.input(fields.language),
-							autoComplete: 'language',
-						}}
-						errors={fields.language.errors}
-					/>
-
 
 					<Field
 						labelProps={{ htmlFor: fields.password.id, children: 'Password' }}

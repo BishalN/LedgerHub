@@ -3,6 +3,15 @@ import React, { useId, useRef } from 'react'
 import { Checkbox, type CheckboxProps } from './ui/checkbox.tsx'
 import { Input } from './ui/input.tsx'
 import { Label } from './ui/label.tsx'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from './ui/select.tsx'
 import { Textarea } from './ui/textarea.tsx'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
@@ -84,6 +93,45 @@ export function TextareaField({
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
 			</div>
 		</div>
+	)
+}
+
+export function Selector({
+	selectPlaceholder,
+	options,
+	selectLabel,
+	name,
+	errors,
+}: {
+	name: string
+	selectPlaceholder: string
+	options: { label: string; value: string }[]
+	selectLabel: string
+	errors?: ListOfErrors
+}) {
+	const id = useId()
+	const errorId = errors?.length ? `${id}-error` : undefined
+	return (
+		<Select name={name}>
+			<SelectTrigger className="w-[320px]">
+				<SelectValue placeholder={selectPlaceholder} />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectGroup>
+					<SelectLabel>{selectLabel}</SelectLabel>
+					{options.map(item => {
+						return (
+							<SelectItem key={item.label} value={item.value}>
+								{item.label}
+							</SelectItem>
+						)
+					})}
+				</SelectGroup>
+			</SelectContent>
+			<div className="px-4">
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</Select>
 	)
 }
 

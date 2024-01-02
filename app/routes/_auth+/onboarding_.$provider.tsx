@@ -145,7 +145,7 @@ export async function action({ request, params }: DataFunctionArgs) {
 		return json({ status: 'error', submission } as const, { status: 400 })
 	}
 
-	const { session, remember, redirectTo } = submission.value
+	const { session, remember } = submission.value
 
 	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
@@ -164,7 +164,7 @@ export async function action({ request, params }: DataFunctionArgs) {
 	)
 
 	return redirectWithToast(
-		safeRedirect(redirectTo),
+		safeRedirect('/onboarding/preferences'),
 		{ title: 'Welcome', description: 'Thanks for signing up!' },
 		{ headers },
 	)
